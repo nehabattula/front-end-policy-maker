@@ -3,25 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azure AI Prompt Form</title>
+    <title>Azure Cognitive Service Call</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        #form-container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
+            margin: 20px;
         }
         #response-container {
             margin-top: 20px;
@@ -29,42 +15,31 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             background-color: #f9f9f9;
-            display: none;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <div id="form-container">
-        <form id="ai-form">
-            <label for="user-prompt">Enter your prompt:</label><br>
-            <input type="text" id="user-prompt" name="user_prompt" required><br><br>
-            <button type="button" onclick="callAzureAI()">Submit</button>
-        </form>
-        <div id="response-container"></div>
-    </div>
+    <h1>Call Azure Cognitive Service</h1>
+    <form id="ai-form">
+        <label for="user-prompt">Enter your text:</label><br>
+        <input type="text" id="user-prompt" required><br><br>
+        <button type="button" onclick="callAzureService()">Submit</button>
+    </form>
+    <div id="response-container" style="display: none;"></div>
 
     <script>
-        async function callAzureAI() {
+        async function callAzureService() {
             const prompt = document.getElementById('user-prompt').value;
-            const endpoint = 'https://<your-azure-endpoint>.openai.azure.com/openai/deployments/<your-deployment-id>/completions?api-version=2022-12-01';
-            const apiKey = '<your-api-key>';
+            const endpoint = 'https://abcchc.azure.com/text/analytics/v3.1/languages'; // Adjust this as per your specific API
+            const apiKey = '<your-api-key>'; // Replace with your actual API key
 
-            // Prepare the request payload
             const requestBody = {
-                prompt: prompt,
-                max_tokens: 100,
-                temperature: 0.7
+                "documents": [
+                    {
+                        "id": "1",
+                        "text": prompt
+                    }
+                ]
             };
 
             try {
@@ -72,24 +47,24 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
+                        'Ocp-Apim-Subscription-Key': apiKey
                     },
                     body: JSON.stringify(requestBody)
                 });
 
+                const responseContainer = document.getElementById('response-container');
                 if (response.ok) {
                     const data = await response.json();
-                    const resultText = data.choices[0].text.trim();
-                    document.getElementById('response-container').innerText = `Response: ${resultText}`;
+                    responseContainer.style.display = 'block';
+                    responseContainer.innerText = JSON.stringify(data, null, 2);
                 } else {
                     const errorText = await response.text();
-                    document.getElementById('response-container').innerText = `Error: ${errorText}`;
+                    responseContainer.style.display = 'block';
+                    responseContainer.innerText = `Error: ${errorText}`;
                 }
-
-                document.getElementById('response-container').style.display = 'block';
             } catch (error) {
-                document.getElementById('response-container').innerText = `Exception: ${error}`;
                 document.getElementById('response-container').style.display = 'block';
+                document.getElementById('response-container').innerText = `Exception: ${error}`;
             }
         }
     </script>
