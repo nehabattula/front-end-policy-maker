@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Policy Generator and FAQ Bot</title>
+    <title>Policy Maker Chatbot</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -44,50 +44,46 @@
             display: flex;
             align-items: flex-start;
         }
-        .user-message {
-            align-self: flex-end;
-            background-color: #e1f5fe;
-            color: #333;
-            text-align: right;
-            display: inline-block;
-        }
         .bot-message {
-            align-self: flex-start;
+            align-self: flex-end;
             background-color: #bbdefb;
             color: #333;
-            display: inline-block;
+            text-align: right;
+            flex-direction: row-reverse;
+        }
+        .user-message {
+            align-self: flex-start;
+            background-color: #e1f5fe;
+            color: #333;
+            text-align: left;
         }
         .bot-icon, .user-icon {
             width: 30px;
             height: 30px;
             border-radius: 50%;
-            margin-right: 10px;
+            margin: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
         }
         .bot-icon {
             background-color: #007bff;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
         }
         .user-icon {
             background-color: #444;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
         }
         #chat-form {
             display: flex;
             flex-direction: column;
         }
-        #prompt, #use-case {
+        #prompt {
             padding: 10px;
             margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            flex-grow: 1;
         }
         #send-button {
             padding: 10px 20px;
@@ -100,18 +96,45 @@
         #send-button:hover {
             background-color: #0056b3;
         }
+        #header {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div id="chat-container">
-        <h2>Policy Generator and FAQ Bot</h2>
-        <div id="chat-box"></div>
+        <div id="header">Policy Maker Chatbot</div>
+        <div id="chat-box">
+            <div class="message user-message">
+                <div class="user-icon">U</div>
+                <div>We could start by getting to know each other if you like. 😊 What is your name?</div>
+            </div>
+            <div class="message bot-message">
+                <div class="bot-icon">B</div>
+                <div>Casimir</div>
+            </div>
+            <div class="message user-message">
+                <div class="user-icon">U</div>
+                <div>Thanks for visiting me Casimir. I know we're going to be great friends.</div>
+            </div>
+            <div class="message user-message">
+                <div class="user-icon">U</div>
+                <div>Tell me about yourself. What sort of things do you like to do?</div>
+            </div>
+            <div class="message bot-message">
+                <div class="bot-icon">B</div>
+                <div>Talking with chatbots</div>
+            </div>
+            <div class="message user-message">
+                <div class="user-icon">U</div>
+                <div>I love talking. It's all I do all day.</div>
+            </div>
+        </div>
         <form id="chat-form">
-            <input type="text" id="prompt" name="prompt" placeholder="Enter your prompt..." required>
-            <select id="use-case" name="use_case">
-                <option value="policy">Generate Policy</option>
-                <option value="faq">Generate FAQs</option>
-            </select>
+            <input type="text" id="prompt" name="prompt" placeholder="Type a message..." required>
             <button type="submit" id="send-button">Send</button>
         </form>
     </div>
@@ -120,46 +143,30 @@
         const form = document.getElementById('chat-form');
         const chatBox = document.getElementById('chat-box');
 
-        form.addEventListener('submit', async (event) => {
+        form.addEventListener('submit', (event) => {
             event.preventDefault();
             const prompt = document.getElementById('prompt').value;
-            const useCase = document.getElementById('use-case').value;
 
-            // Display user message with icon
+            // Display user message
             chatBox.innerHTML += `
                 <div class="message user-message">
                     <div class="user-icon">U</div>
-                    <div><strong>You:</strong> ${prompt}</div>
+                    <div>${prompt}</div>
                 </div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
 
             // Clear input
             document.getElementById('prompt').value = '';
 
-            // Fetch response from the server
-            try {
-                const response = await fetch('/ask', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({prompt, use_case: useCase})
-                });
-                const data = await response.json();
-
-                // Display bot response with icon
+            // Simulate bot response (for demonstration)
+            setTimeout(() => {
                 chatBox.innerHTML += `
                     <div class="message bot-message">
                         <div class="bot-icon">B</div>
-                        <div><strong>Bot:</strong> ${data.response}</div>
+                        <div>That's interesting! Please tell me more.</div>
                     </div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
-            } catch (error) {
-                chatBox.innerHTML += `
-                    <div class="message bot-message">
-                        <div class="bot-icon">B</div>
-                        <div><strong>Bot:</strong> Sorry, there was an error processing your request.</div>
-                    </div>`;
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
+            }, 1000);
         });
     </script>
 </body>
