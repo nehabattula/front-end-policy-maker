@@ -3,171 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Policy Maker Chatbot</title>
+    <title>Azure AI Prompt Form</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
         }
-        #chat-container {
-            width: 90%;
-            max-width: 600px;
+        #form-container {
             background: white;
-            border: 1px solid #ccc;
-            border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            height: 80vh;
-        }
-        #chat-box {
-            flex-grow: 1;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            margin-bottom: 10px;
-            background-color: #f9f9f9;
-        }
-        .message {
-            margin: 10px 0;
-            padding: 10px;
             border-radius: 8px;
-            max-width: 80%;
-            display: flex;
-            align-items: flex-start;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
         }
-        .bot-message {
-            align-self: flex-end;
-            background-color: #bbdefb;
-            color: #333;
-            text-align: right;
-            flex-direction: row-reverse;
-        }
-        .user-message {
-            align-self: flex-start;
-            background-color: #e1f5fe;
-            color: #333;
-            text-align: left;
-        }
-        .bot-icon, .user-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            margin: 0 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-        }
-        .bot-icon {
-            background-color: #007bff;
-        }
-        .user-icon {
-            background-color: #444;
-        }
-        #chat-form {
-            display: flex;
-            flex-direction: column;
-        }
-        #prompt {
+        #response-container {
+            margin-top: 20px;
             padding: 10px;
-            margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            flex-grow: 1;
+            background-color: #f9f9f9;
+            display: none;
         }
-        #send-button {
-            padding: 10px 20px;
-            background-color: #007BFF;
+        button {
+            background-color: #007bff;
             color: white;
+            padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
-        #send-button:hover {
+        button:hover {
             background-color: #0056b3;
-        }
-        #header {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 20px;
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div id="chat-container">
-        <div id="header">Policy Maker Chatbot</div>
-        <div id="chat-box">
-            <div class="message user-message">
-                <div class="user-icon">U</div>
-                <div>We could start by getting to know each other if you like. 😊 What is your name?</div>
-            </div>
-            <div class="message bot-message">
-                <div class="bot-icon">B</div>
-                <div>Casimir</div>
-            </div>
-            <div class="message user-message">
-                <div class="user-icon">U</div>
-                <div>Thanks for visiting me Casimir. I know we're going to be great friends.</div>
-            </div>
-            <div class="message user-message">
-                <div class="user-icon">U</div>
-                <div>Tell me about yourself. What sort of things do you like to do?</div>
-            </div>
-            <div class="message bot-message">
-                <div class="bot-icon">B</div>
-                <div>Talking with chatbots</div>
-            </div>
-            <div class="message user-message">
-                <div class="user-icon">U</div>
-                <div>I love talking. It's all I do all day.</div>
-            </div>
-        </div>
-        <form id="chat-form">
-            <input type="text" id="prompt" name="prompt" placeholder="Type a message..." required>
-            <button type="submit" id="send-button">Send</button>
+    <div id="form-container">
+        <form id="ai-form">
+            <label for="user-prompt">Enter your prompt:</label><br>
+            <input type="text" id="user-prompt" name="user_prompt" required><br><br>
+            <button type="button" onclick="callAzureAI()">Submit</button>
         </form>
+        <div id="response-container"></div>
     </div>
 
     <script>
-        const form = document.getElementById('chat-form');
-        const chatBox = document.getElementById('chat-box');
+        async function callAzureAI() {
+            const prompt = document.getElementById('user-prompt').value;
+            const endpoint = 'https://<your-azure-endpoint>.openai.azure.com/openai/deployments/<your-deployment-id>/completions?api-version=2022-12-01';
+            const apiKey = '<your-api-key>';
 
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const prompt = document.getElementById('prompt').value;
+            // Prepare the request payload
+            const requestBody = {
+                prompt: prompt,
+                max_tokens: 100,
+                temperature: 0.7
+            };
 
-            // Display user message
-            chatBox.innerHTML += `
-                <div class="message user-message">
-                    <div class="user-icon">U</div>
-                    <div>${prompt}</div>
-                </div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify(requestBody)
+                });
 
-            // Clear input
-            document.getElementById('prompt').value = '';
+                if (response.ok) {
+                    const data = await response.json();
+                    const resultText = data.choices[0].text.trim();
+                    document.getElementById('response-container').innerText = `Response: ${resultText}`;
+                } else {
+                    const errorText = await response.text();
+                    document.getElementById('response-container').innerText = `Error: ${errorText}`;
+                }
 
-            // Simulate bot response (for demonstration)
-            setTimeout(() => {
-                chatBox.innerHTML += `
-                    <div class="message bot-message">
-                        <div class="bot-icon">B</div>
-                        <div>That's interesting! Please tell me more.</div>
-                    </div>`;
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }, 1000);
-        });
+                document.getElementById('response-container').style.display = 'block';
+            } catch (error) {
+                document.getElementById('response-container').innerText = `Exception: ${error}`;
+                document.getElementById('response-container').style.display = 'block';
+            }
+        }
     </script>
 </body>
 </html>
